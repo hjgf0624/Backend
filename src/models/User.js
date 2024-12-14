@@ -4,7 +4,8 @@ const userSchema = new mongoose.Schema(
     {
         id : {
             type: String,
-            required: true,
+            unique: true,
+            required: true
         },
         index : {
             type: Number,
@@ -46,7 +47,6 @@ const userSchema = new mongoose.Schema(
         state : {
             type: String,
             required: false,
-            unique: true
         },
         credit : {
             type: Number,
@@ -58,7 +58,18 @@ const userSchema = new mongoose.Schema(
             required: false,
             default: 0
         }
-    }
-);
+    }, {
+        timestamps: true
+    });
 
-userSchema.pre
+userSchema.pre('save', async function (next) {
+    if(this.isNew) {
+        const maxIndex = await this.constructor.findOne().sort('-index').select('index').exec();
+        this.index = maxIndex ? maxIndex.index + 1 : 1;
+    }
+    next();
+});
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
