@@ -1,20 +1,10 @@
-require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
-const mongoose = require('mongoose');
+const dotenv = require('dotenv'); // 환경 변수 설정
+const mongoose = require('./models');
 
-// MongoDB 연결
-async function connectDB() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('MongoDB 연결 성공');
-  } catch (err) {
-    console.error('MongoDB 연결 실패', err);
-    process.exit(1);
-  }
-}
+dotenv.config();
+
+connectDB();
 
 // 라우트 등록
 fastify.register(require('./routes'));
@@ -24,7 +14,7 @@ const start = async () => {
   await connectDB();
   try {
     await fastify.listen({ port: process.env.PORT || 3000 });
-    console.log('Server running on http://localhost:3000');
+    console.log('서버가 http://localhost:3000 에서 실행되고 있습니다.');
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
